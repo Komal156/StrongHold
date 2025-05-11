@@ -76,3 +76,4 @@ int Invasion::getImpact() const
 {
     return troopCount;
 }
+//a
