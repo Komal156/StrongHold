@@ -219,3 +219,4 @@ bool World::hasEmbargo(const string& k1, const string& k2) const {
 Kingdom** World::getKingdoms() const {
     return const_cast<Kingdom**>(&kingdoms[0]); // Cast the address of the first element to Kingdom**
 }
+//a
