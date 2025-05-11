@@ -10,3 +10,4 @@ void Alliance::breakAlliance() {
     active = false;
     cout << type << " between " << kingdom1 << " and " << kingdom2 << " has been broken.\n";
 }
+///a
