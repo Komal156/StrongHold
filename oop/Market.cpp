@@ -2,6 +2,7 @@
 #include <iostream>
 using namespace std;
 
+
 Market::Market() : tradeCount(0), smuggleCount(0) {
     for (int i = 0; i < MAX_TRADES; i++) {
         trades[i] = nullptr;
