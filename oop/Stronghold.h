@@ -575,3 +575,4 @@ public:
     Wood* getWood() { return &wood; }
     Iron* getIron() { return &iron; }
 };
+//a
