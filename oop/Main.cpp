@@ -100,6 +100,7 @@ int main() {
     delete world;
     return 0;
 }
+//c
 
 int getValidatedInput(int min, int max) {
     int input;
