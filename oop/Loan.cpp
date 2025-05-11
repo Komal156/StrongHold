@@ -19,3 +19,4 @@ void Loan::makePayment(int payment)
         isPaid = true;
     }
 }
+//a
