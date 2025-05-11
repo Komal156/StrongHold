@@ -57,3 +57,4 @@ void Economy::addToTreasury(int amount) {
 Economy::~Economy() {
     delete bank; // To avoid memory leak
 }
+///a
