@@ -66,3 +66,4 @@ Iron::Iron(int initialQuantity, int mineCount)
 void Iron::produce(int efficiency) {
     Resource::produce(efficiency);
 }
+//a
