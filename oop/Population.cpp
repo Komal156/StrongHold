@@ -25,3 +25,4 @@ void Population::migrate(int amount) {
     totalCount += amount;
     if (totalCount < 0) totalCount = 0; // Ensure population doesn't go negative
 }
+//a
