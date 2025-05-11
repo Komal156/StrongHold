@@ -56,3 +56,4 @@ void Noble::demandChange() const
 {
     cout << "Nobles demand more privileges!\n";
 }
+//a
