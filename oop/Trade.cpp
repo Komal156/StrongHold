@@ -1,6 +1,7 @@
 #include "stronghold.h"
 #include <iostream>
 using namespace std;
+//a
 
 TradeOffer::TradeOffer(const string& prop, const string& tgt, const string& res, int qtyO, const string& reqRes, int qtyR)
     : proposer(prop), target(tgt), resourceType(res), quantityOffered(qtyO), requestedResource(reqRes), quantityRequested(qtyR), accepted(false) {
