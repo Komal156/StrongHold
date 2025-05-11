@@ -100,3 +100,4 @@ int Map::getDistance(const string& k1, const string& k2) const {
 bool Map::isControlled(int x, int y, int kingdomId) const {
     return grid[x][y] == kingdomId;
 }
+//a
