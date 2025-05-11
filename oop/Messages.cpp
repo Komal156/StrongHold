@@ -9,3 +9,4 @@ Message::Message(const string& sndr, const string& rcpt, const string& cntnt, in
 void Message::display() const {
     cout << "Year " << year << ": From " << sender << " to " << recipient << ": " << content << "\n";
 }
+//comment
