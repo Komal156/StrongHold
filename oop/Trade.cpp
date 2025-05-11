@@ -58,3 +58,4 @@ bool SmuggleOffer::accept(Kingdom& proposerKingdom, Kingdom& targetKingdom) {
     }
     return TradeOffer::accept(proposerKingdom, targetKingdom);
 }
+//a
