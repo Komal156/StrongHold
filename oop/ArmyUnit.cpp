@@ -69,3 +69,4 @@ void Cavalry::recruit(int amount) {
     ArmyUnit::recruit(amount);
     horses += amount / 10; // Recruit horses proportionally
 }
+//army
