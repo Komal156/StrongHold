@@ -85,7 +85,7 @@ int main() {
             case 4:
                 displayMainMenu();
                 // Return to Game
-            case 5: // Exit
+            case 5: // Exit #exit
                 gameRunning = false;
                 break;
             default:
