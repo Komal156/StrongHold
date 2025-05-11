@@ -410,6 +410,7 @@ public:
 };
 
 // Derived Resources
+//added
 class Food : public Resource {
 private:
     int farms;
