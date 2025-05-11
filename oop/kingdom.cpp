@@ -235,3 +235,4 @@ void Kingdom::displayActiveEvents() {
     cout << "2. Plague: Population health is declining.\n";
     cout << "3. Invasion: Military strength is under threat.\n";
 }
+//a
