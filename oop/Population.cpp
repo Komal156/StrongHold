@@ -6,8 +6,8 @@ Population::Population(int initialCount)
     : totalCount(initialCount), growthRate(0), health(100), employmentRate(100) {
 }
 
-void Population::calculateGrowth(int foodAvailability, int housingQuality) {
-    growthRate = (foodAvailability + housingQuality) / 2;
+void Population::calculateGrowth(int foodAvailability, int housingQuality) {  //ideal food and husing=100;
+    growthRate = (foodAvailability + housingQuality) / 2; //average 
     totalCount += growthRate;
 }
 

@@ -27,3 +27,21 @@ Year 3: Addressed demands of social classes
 Year 5: Collected taxes from all social classes
 Year 6: Funded public service with 500 gold
 Year 7: War declared on finland
+Year 1: Kingdom gupis was founded with leader komal and heir ana
+Year 1: Kingdom gilgit was founded with leader ali and heir faaizan
+Year 2: Population growth rate adjusted
+Year 3: Population health improved
+Year 5: Collected taxes from all social classes
+Year 6: Collected taxes from all social classes
+Year 7: Year 7 advanced
+Year 8: Addressed demands of social classes
+Year 1: Kingdom isb was founded with leader kik and heir hb
+Year 1: Kingdom lhr was founded with leader ass and heir sss
+Year 2: Leader made decision type 3
+Year 3: Leader addressed a crisis
+Year 6: Recruited 15 soldiers
+Year 7: Army trained with intensity 80
+Year 1: Kingdom isb was founded with leader aa and heir ss
+Year 1: Kingdom kar was founded with leader kk and heir dd
+Year 2: Alliance formed with kar
+Year 3: Alliance broken with isb
