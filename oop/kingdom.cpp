@@ -2,12 +2,12 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <cstdlib> // for rand()
+#include <cstdlib>
+#include <sstream> // Added for istringstream
 using namespace std;
 
 Kingdom::Kingdom(const string& kingdomName, int id, const string& leaderName, const string& heirname)
-    : name(kingdomName), stability(50), year(1), socialClassCount(0), mapX(0), mapY(0), kingdomId(id)
-{
+    : name(kingdomName), stability(50), year(1), socialClassCount(0), mapX(0), mapY(0), kingdomId(id) {
     population = new Population(1000);
     socialClasses[socialClassCount++] = new Peasant(500, 40, 20, 50, 30);
     socialClasses[socialClassCount++] = new Merchant(300, 50, 30, 1000);
@@ -16,7 +16,7 @@ Kingdom::Kingdom(const string& kingdomName, int id, const string& leaderName, co
     leader = new Monarch(leaderName, 50, 10, "Benevolent", heirname, 10);
     economy = new Economy(5000);
 }
-// Destructor
+
 Kingdom::~Kingdom() {
     delete population;
     delete military;
@@ -27,7 +27,6 @@ Kingdom::~Kingdom() {
     }
 }
 
-// Simulate a turn in the kingdom
 void Kingdom::simulateTurn() {
     ++year;
     population->calculateGrowth(80, 70);
@@ -42,7 +41,6 @@ void Kingdom::simulateTurn() {
     recalculateStability();
 }
 
-// Attack another kingdom
 void Kingdom::attack(Kingdom& defender) {
     try {
         int attackerStrength = military->calculateStrength();
@@ -57,7 +55,7 @@ void Kingdom::attack(Kingdom& defender) {
             cout << name << " wins the battle against " << defender.getName() << "!\n";
         }
         else {
-            military->recruit(-military->getSoldierCount() / 2); // Fixed soldierCount to getSoldierCount()
+            military->recruit(-military->getSoldierCount() / 2);
             adjustStability(-20);
             cout << defender.getName() << " repels the attack from " << name << "!\n";
         }
@@ -67,7 +65,6 @@ void Kingdom::attack(Kingdom& defender) {
     }
 }
 
-// Betray an ally kingdom
 void Kingdom::betray(Kingdom& ally) {
     try {
         cout << name << " betrays " << ally.getName() << "!\n";
@@ -81,7 +78,6 @@ void Kingdom::betray(Kingdom& ally) {
     }
 }
 
-// Display kingdom status
 void Kingdom::displayStatus() const {
     cout << "\n************************************************************************************************************\n";
     cout << "\n                                         Kingdom Status                                                    \n";
@@ -93,12 +89,12 @@ void Kingdom::displayStatus() const {
     cout << "Treasury: " << economy->getTreasury() << " gold\n";
     cout << "Military Strength: " << military->calculateStrength() << "\n";
     cout << "Leader: " << leader->getName() << " (" << leader->getLeadershipStyle() << ")\n";
-    // Added: Display heir name
-    cout << "Heir: " << dynamic_cast<Monarch*>(leader)->getHeir() << "\n"; // NEW: Added heir display
+    Monarch* monarch = dynamic_cast<Monarch*>(leader);
+    cout << "Heir: " << (monarch ? monarch->getHeir() : "N/A") << "\n";
+    cout << "Map Position: (" << mapX << ", " << mapY << ")\n";
     cout << "\n============================================================================================================\n";
 }
 
-// Save kingdom state to file
 void Kingdom::saveGameState(const string& filename) const {
     ofstream outFile(filename);
     if (!outFile) {
@@ -122,20 +118,20 @@ void Kingdom::saveGameState(const string& filename) const {
         << military->getTrainingLevel() << " "
         << military->getEquipmentQuality() << "\n";
 
-    Monarch* monarch = dynamic_cast<Monarch*>(leader); // NEW: Safely cast leader to Monarch
+    Monarch* monarch = dynamic_cast<Monarch*>(leader);
     if (monarch) {
         outFile << leader->getName() << " "
             << leader->getPopularity() << " "
             << leader->getCorruptionLevel() << " "
             << leader->getLeadershipStyle() << " "
-            << monarch->getHeir() << "\n"; // Use monarch->getHeir() if cast succeeds
+            << monarch->getHeir() << "\n";
     }
     else {
         outFile << leader->getName() << " "
             << leader->getPopularity() << " "
             << leader->getCorruptionLevel() << " "
             << leader->getLeadershipStyle() << " "
-            << "No_Heir" << "\n"; // Fallback if not a Monarch
+            << "No_Heir" << "\n";
     }
 
     outFile << economy->getTreasury() << " "
@@ -144,45 +140,55 @@ void Kingdom::saveGameState(const string& filename) const {
         << economy->getGDP() << " "
         << economy->getCorruptionLevel() << "\n";
 
+    outFile << mapX << " " << mapY << " " << kingdomId << "\n";
+
     outFile.close();
 }
 
-// Load kingdom state from file
-void Kingdom::loadGameState(const string& filename) {
+bool Kingdom::loadGameState(const string& filename) {
     ifstream inFile(filename);
     if (!inFile) {
-        throw runtime_error("Failed to open file for loading: " + filename);
+        cerr << "Failed to open file for loading: " << filename << "\n";
+        return false;
     }
 
-    // Read kingdom name
-    if (!getline(inFile, name)) {
-        throw runtime_error("Failed to read kingdom name from " + filename);
+    string tempName;
+    if (!getline(inFile, tempName)) {
+        inFile.close();
+        cerr << "Failed to read kingdom name from " << filename << "\n";
+        return false;
     }
-    // Read stability and year
+    name = tempName;
+
     if (!(inFile >> stability >> year)) {
-        throw runtime_error("Failed to read stability or year from " + filename);
+        inFile.close();
+        cerr << "Failed to read stability or year from " << filename << "\n";
+        return false;
     }
+    inFile.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    // Read population
     int populationCount;
     if (!(inFile >> populationCount)) {
-        throw runtime_error("Failed to read population count from " + filename);
+        inFile.close();
+        cerr << "Failed to read population count from " << filename << "\n";
+        return false;
     }
+    inFile.ignore(numeric_limits<streamsize>::max(), '\n');
     delete population;
     population = new Population(populationCount);
 
-    // Clear existing social classes
     for (int i = 0; i < socialClassCount; ++i) {
         delete socialClasses[i];
     }
     socialClassCount = 0;
 
-    // Read social classes
-    for (int i = 0; i < MAX_SOCIAL_CLASSES; ++i) {
+    string line;
+    while (socialClassCount < MAX_SOCIAL_CLASSES && getline(inFile, line)) {
         string className;
         int pop, happy, infl;
-        if (!(inFile >> className >> pop >> happy >> infl)) {
-            break; // Stop if no more classes (end of data)
+        istringstream iss(line);
+        if (!(iss >> className >> pop >> happy >> infl)) {
+            break;
         }
         if (className == "Peasant") {
             socialClasses[socialClassCount++] = new Peasant(pop, happy, infl, 50, 30);
@@ -194,49 +200,79 @@ void Kingdom::loadGameState(const string& filename) {
             socialClasses[socialClassCount++] = new Noble(pop, happy, infl, 50);
         }
         else {
-            throw runtime_error("Unknown social class '" + className + "' in " + filename);
+            inFile.close();
+            cerr << "Unknown social class '" << className << "' in " << filename << "\n";
+            return false;
         }
     }
 
-    // Read military
     int soldiers, morale, training, equipment;
     if (!(inFile >> soldiers >> morale >> training >> equipment)) {
-        throw runtime_error("Failed to read military data from " + filename);
+        inFile.close();
+        cerr << "Failed to read military data from " << filename << "\n";
+        return false;
     }
+    inFile.ignore(numeric_limits<streamsize>::max(), '\n');
     delete military;
     military = new Infantry(soldiers, morale, training, equipment, 50, 100);
 
-    // Read leader (note: heir is not hardcoded)
     string leaderName, style, heirName;
     int popularity, corruption;
     if (!(inFile >> leaderName >> popularity >> corruption >> style >> heirName)) {
-        throw runtime_error("Failed to read leader data from " + filename);
+        inFile.close();
+        cerr << "Failed to read leader data from " << filename << "\n";
+        return false;
     }
+    inFile.ignore(numeric_limits<streamsize>::max(), '\n');
     delete leader;
     leader = new Monarch(leaderName, popularity, corruption, style, heirName, 10);
 
-    // Read economy
     int treasury, taxRate, inflation, gdp, corruptionLevel;
     if (!(inFile >> treasury >> taxRate >> inflation >> gdp >> corruptionLevel)) {
-        throw runtime_error("Failed to read economy data from " + filename);
+        inFile.close();
+        cerr << "Failed to read economy data from " << filename << "\n";
+        return false;
     }
+    inFile.ignore(numeric_limits<streamsize>::max(), '\n');
     delete economy;
     economy = new Economy(treasury);
     if (taxRate < 0 || taxRate > 100) {
-        throw runtime_error("Invalid tax rate " + to_string(taxRate) + " in " + filename + ". Must be between 0 and 100.");
+        inFile.close();
+        cerr << "Invalid tax rate " << taxRate << " in " << filename << "\n";
+        return false;
     }
     economy->adjustTaxRate(taxRate);
 
+    int tempMapX, tempMapY, tempKingdomId;
+    if (!(inFile >> tempMapX >> tempMapY >> tempKingdomId)) {
+        inFile.close();
+        cerr << "Failed to read map coordinates or ID from " << filename << "\n";
+        return false;
+    }
+    if (tempMapX < 0 || tempMapX >= MAP_SIZE || tempMapY < 0 || tempMapY >= MAP_SIZE) {
+        inFile.close();
+        cerr << "Invalid map coordinates in " << filename << "\n";
+        return false;
+    }
+    if (tempKingdomId < 1 || tempKingdomId > MAX_KINGDOMS) {
+        inFile.close();
+        cerr << "Invalid kingdom ID in " << filename << "\n";
+        return false;
+    }
+    mapX = tempMapX;
+    mapY = tempMapY;
+    kingdomId = tempKingdomId;
+
     inFile.close();
+    return true;
 }
 
-// Recalculate kingdom stability
 void Kingdom::recalculateStability() {
     int happinessSum = 0;
     for (int i = 0; i < socialClassCount; ++i) {
         happinessSum += socialClasses[i]->getHappiness();
     }
-    int averageHappiness = happinessSum / socialClassCount;
+    int averageHappiness = (socialClassCount > 0) ? (happinessSum / socialClassCount) : 50; // Default to 50 if no social classes
 
     stability = (averageHappiness * 4 / 10) +
         (military->getMorale() * 3 / 10) +
@@ -246,19 +282,17 @@ void Kingdom::recalculateStability() {
     if (stability < 0) stability = 0;
 }
 
-// Adjust kingdom stability with a modifier
 void Kingdom::adjustStability(int modifier) {
     stability += modifier;
     if (stability > 100) stability = 100;
     if (stability < 0) stability = 0;
 }
 
-// Trigger a random event
 void Kingdom::triggerRandomEvent() {
+    // Simplified to avoid dependencies on unimplemented Event class
     int eventType = rand() % 3;
     if (eventType == 0) {
         cout << "A famine has struck the kingdom!\n";
-        economy->getFood()->consume(100);
         adjustStability(-10);
     }
     else if (eventType == 1) {
@@ -273,17 +307,16 @@ void Kingdom::triggerRandomEvent() {
     }
 }
 
-// Resolve all active events
 void Kingdom::resolveActiveEvents() {
+    // Simplified to avoid dependencies
     cout << "Resolving all active events...\n";
     adjustStability(10);
-    economy->getFood()->produce(50);
 }
 
-// Display active events
 void Kingdom::displayActiveEvents() {
-    cout << "Active Events:\n";
-    cout << "1. Famine: Food resources are low.\n";
-    cout << "2. Plague: Population health is declining.\n";
-    cout << "3. Invasion: Military strength is under threat.\n";
+    // Simplified to avoid dependencies
+    cout << "Active Events (simulated):\n";
+    cout << "1. Famine: Stability reduced.\n";
+    cout << "2. Plague: Population reduced.\n";
+    cout << "3. Invasion: Military strength reduced.\n";
 }

@@ -1,6 +1,5 @@
 #include "stronghold.h"
 #include <iostream>
-//world.cpp
 using namespace std;
 
 World::World() : kingdomCount(0), messageCount(0), allianceCount(0), currentYear(1) {
@@ -26,7 +25,7 @@ World::~World() {
         delete messages[i];
         messages[i] = nullptr;
     }
-    for (int i = 0; i < allianceCount; i++) {
+    for (int i = 0; i < MAX_ALLIANCES; i++) {
         delete alliances[i];
         alliances[i] = nullptr;
     }
@@ -41,7 +40,50 @@ void World::addKingdom(Kingdom* kingdom) {
         throw runtime_error("Maximum kingdom limit reached.");
     }
     kingdoms[kingdomCount] = kingdom;
-    map->assignKingdom(kingdom->getName(), kingdomCount, kingdomCount, kingdomCount + 1);
+    int x = kingdomCount % MAP_SIZE;
+    int y = kingdomCount % MAP_SIZE;
+    bool found = false;
+    for (int i = 0; i < MAP_SIZE * MAP_SIZE; i++) {
+        x = (kingdomCount + i) % MAP_SIZE;
+        y = (kingdomCount + i) % MAP_SIZE;
+        if (!map->isOccupied(x, y)) {
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        throw runtime_error("No available map positions for new kingdom.");
+    }
+    map->assignKingdom(kingdom->getName(), x, y, kingdomCount + 1);
+    kingdom->setMapPosition(x, y);
+    kingdomCount++;
+}
+
+void World::addKingdom(Kingdom* kingdom, int x, int y, int id) {
+    if (kingdomCount >= MAX_KINGDOMS) {
+        throw runtime_error("Maximum kingdom limit reached.");
+    }
+    if (id < 1 || id > MAX_KINGDOMS) {
+        throw runtime_error("Invalid kingdom ID during load.");
+    }
+    kingdoms[kingdomCount] = kingdom;
+    if (map->isOccupied(x, y)) {
+        bool found = false;
+        for (int i = 0; i < MAP_SIZE * MAP_SIZE; i++) {
+            x = (x + i) % MAP_SIZE;
+            y = (y + i) % MAP_SIZE;
+            if (!map->isOccupied(x, y)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            throw runtime_error("No available map positions for loaded kingdom.");
+        }
+        cout << "Warning: Map position (" << kingdom->getMapX() << "," << kingdom->getMapY() << ") was occupied. Moved to (" << x << "," << y << ").\n";
+    }
+    map->assignKingdom(kingdom->getName(), x, y, id);
+    kingdom->setMapPosition(x, y);
     kingdomCount++;
 }
 
@@ -173,24 +215,6 @@ void World::declareWar(const string& attacker, const string& defender) {
     }
 }
 
-void World::moveKingdom(const string& kingdom, int x, int y) {
-    try {
-        Kingdom* k = findKingdom(kingdom);
-        if (!k) {
-            throw runtime_error("Kingdom not found.");
-        }
-        if (x < 0 || x >= MAP_SIZE || y < 0 || y >= MAP_SIZE) {
-            throw runtime_error("Invalid map coordinates.");
-        }
-        map->moveKingdom(k->getKingdomId(), x, y);
-        k->setMapPosition(x, y);
-        cout << kingdom << " moved to (" << x << ", " << y << ").\n";
-    }
-    catch (const runtime_error& e) {
-        cerr << "Error moving kingdom: " << e.what() << "\n";
-    }
-}
-
 Kingdom* World::findKingdom(const string& name) {
     for (int i = 0; i < kingdomCount; i++) {
         if (kingdoms[i] && kingdoms[i]->getName() == name) {
@@ -212,11 +236,9 @@ bool World::areAllied(const string& k1, const string& k2) const {
 }
 
 bool World::hasEmbargo(const string& k1, const string& k2) const {
-    // Placeholder: Assume no embargoes for simplicity
     return false;
 }
 
 Kingdom** World::getKingdoms() const {
-    return const_cast<Kingdom**>(&kingdoms[0]); // Cast the address of the first element to Kingdom**
+    return const_cast<Kingdom**>(&kingdoms[0]);
 }
-//a

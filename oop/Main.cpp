@@ -32,20 +32,18 @@ int main() {
 
     while (gameRunning) {
         displayMainMenu();
-        int choice = getValidatedInput(1, 4);
+        int choice = getValidatedInput(1, 5);
 
         try {
-            switch (choice) 
-            {
-            case 1:
-            { // New Game
+            switch (choice) {
+            case 1: { // New Game
                 int numKingdoms;
                 cout << "Enter number of kingdoms (2-4): ";
                 numKingdoms = getValidatedInput(2, 4);
                 for (int i = 0; i < numKingdoms; i++) {
                     string kingdomName, leaderName, heirName;
                     cout << "Enter name for kingdom " << i + 1 << ": ";
-                    getline(cin, kingdomName);
+                    getline(cin >> ws, kingdomName);
                     cout << "Enter name for the leader of kingdom " << kingdomName << ": ";
                     getline(cin, leaderName);
                     cout << "Enter name for the heir of " << leaderName << ": ";
@@ -60,32 +58,64 @@ int main() {
             case 2: { // Load Game
                 string filename;
                 cout << "Enter save file name: ";
-                getline(cin, filename);
+                getline(cin >> ws, filename);
                 try {
                     World* newWorld = new World();
+                    newWorld->getMap()->clear();
                     int numKingdoms;
-                    cout << "Enter number of kingdoms to load: ";
+                    cout << "Enter number of kingdoms to load (1-4): ";
                     numKingdoms = getValidatedInput(1, 4);
+                    bool loadSuccess = false;
                     for (int i = 0; i < numKingdoms; i++) {
                         cout << "Loading kingdom " << i + 1 << "\n";
                         string kingdomName;
                         cout << "Enter name for kingdom " << i + 1 << ": ";
                         getline(cin, kingdomName);
-                        Kingdom* kingdom = new Kingdom(kingdomName, i + 1);
-                        try {
-                            kingdom->loadGameState(filename);
-                            newWorld->addKingdom(kingdom);
-                            logGameEvent("Kingdom " + kingdomName + " loaded from " + filename, *kingdom);
+                        // Quick check if kingdom name exists in file
+                        ifstream inFile(filename);
+                        if (!inFile) {
+                            cerr << "Error: Cannot open file " << filename << "\n";
+                            continue;
                         }
-                        catch (const exception& e) {
-                            cerr << "Error loading kingdom " << kingdomName << ": " << e.what() << "\n";
-                            delete kingdom; // Clean up
-                            continue; // Skip to next kingdom
+                        string fileKingdomName;
+                        if (!getline(inFile, fileKingdomName)) {
+                            inFile.close();
+                            cerr << "Error: Save file is empty or invalid\n";
+                            continue;
+                        }
+                        inFile.close();
+                        if (fileKingdomName != kingdomName) {
+                            cerr << "Error: Kingdom name " << kingdomName << " does not match save file (" << fileKingdomName << ")\n";
+                            continue;
+                        }
+                        Kingdom* kingdom = new Kingdom(kingdomName, 0);
+                        if (kingdom->loadGameState(filename)) {
+                            try {
+                                newWorld->addKingdom(kingdom, kingdom->getMapX(), kingdom->getMapY(), kingdom->getKingdomId());
+                                logGameEvent("Kingdom " + kingdomName + " loaded from " + filename, *kingdom);
+                                loadSuccess = true;
+                            }
+                            catch (const exception& e) {
+                                cerr << "Error placing kingdom on map: " << e.what() << "\n";
+                                delete kingdom;
+                                continue;
+                            }
+                        }
+                        else {
+                            cerr << "Error: Failed to load kingdom " << kingdomName << "\n";
+                            delete kingdom;
+                            continue;
                         }
                     }
-                    delete world;
-                    world = newWorld;
-                    playGame(*world);
+                    if (loadSuccess) {
+                        delete world;
+                        world = newWorld;
+                        playGame(*world);
+                    }
+                    else {
+                        delete newWorld;
+                        cout << "No kingdoms loaded successfully. Returning to main menu.\n";
+                    }
                 }
                 catch (const exception& e) {
                     cerr << "Error loading game: " << e.what() << "\n";
@@ -95,11 +125,15 @@ int main() {
             case 3: // View Logs
                 displayLogs();
                 break;
-
-            case 4:
-                displayMainMenu();
-                // Return to Game
-            case 5: // Exit 
+            case 4: // Return to Game
+                if (world->getKingdomCount() > 0) {
+                    playGame(*world);
+                }
+                else {
+                    cout << "No game in progress. Start a new game or load one.\n";
+                }
+                break;
+            case 5: // Exit
                 gameRunning = false;
                 break;
             default:
@@ -114,7 +148,6 @@ int main() {
     delete world;
     return 0;
 }
-//c
 
 int getValidatedInput(int min, int max) {
     int input;
@@ -147,8 +180,12 @@ void displayMainMenu() {
 }
 
 void playGame(World& world) {
+    if (world.getKingdomCount() == 0) {
+        cout << "No kingdoms available to play. Returning to main menu.\n";
+        return;
+    }
     bool inGame = true;
-    int currentKingdomIndex = 0; // Track the current kingdom
+    int currentKingdomIndex = 0;
 
     while (inGame) {
         try {
@@ -156,9 +193,10 @@ void playGame(World& world) {
             Kingdom* currentKingdom = world.getKingdoms()[currentKingdomIndex];
             cout << "\nCurrently in Kingdom: " << currentKingdom->getName() << "\n";
             currentKingdom->displayStatus();
+            world.getMap()->display();
             displayKingdomOptions(world, *currentKingdom);
 
-            int choice = getValidatedInput(1, 13); // Add an extra option for switching kingdoms
+            int choice = getValidatedInput(1, 12);
             switch (choice) {
             case 1: // Advance Year
                 logGameEvent("Year " + to_string(currentKingdom->getYear()) + " advanced", *currentKingdom);
@@ -202,12 +240,6 @@ void playGame(World& world) {
             case 12: // Return to Main Menu
                 inGame = false;
                 break;
-            case 13: { // Switch Kingdom
-                cout << "Enter kingdom index (1-" << world.getKingdomCount() << "): ";
-                int newIndex = getValidatedInput(1, world.getKingdomCount()) - 1;
-                currentKingdomIndex = newIndex;
-                break;
-            }
             default:
                 cout << "Invalid choice. Try again.\n";
             }
@@ -234,7 +266,6 @@ void displayKingdomOptions(World& world, Kingdom& kingdom) {
     cout << "10. Multiplayer Actions\n";
     cout << "11. Save Game\n";
     cout << "12. Return to Main Menu\n";
-    cout << "13. Switch Kingdom\n"; // New option
     cout << "Enter your choice: ";
 }
 
@@ -250,12 +281,11 @@ void handleMultiplayerActions(World& world, Kingdom& kingdom) {
     cout << "6. Propose Smuggling\n";
     cout << "7. View Market\n";
     cout << "8. Declare War\n";
-    cout << "9. Move Kingdom\n";
-    cout << "10. View Map\n";
-    cout << "11. Back\n";
+    cout << "9. View Map\n";
+    cout << "10. Back\n";
     cout << "Enter your choice: ";
 
-    int choice = getValidatedInput(1, 11);
+    int choice = getValidatedInput(1, 10);
     switch (choice) {
     case 1: { // Send Message
         string recipient, content;
@@ -339,20 +369,10 @@ void handleMultiplayerActions(World& world, Kingdom& kingdom) {
         logGameEvent("War declared on " + defender, kingdom);
         break;
     }
-    case 9: { // Move Kingdom
-        int x, y;
-        cout << "Enter new X coordinate (0-4): ";
-        x = getValidatedInput(0, 4);
-        cout << "Enter new Y coordinate (0-4): ";
-        y = getValidatedInput(0, 4);
-        world.moveKingdom(kingdom.getName(), x, y);
-        logGameEvent("Kingdom moved to (" + to_string(x) + "," + to_string(y) + ")", kingdom);
-        break;
-    }
-    case 10: // View Map
+    case 9: // View Map
         world.getMap()->display();
         break;
-    case 11: // Back
+    case 10: // Back
         return;
     default:
         cout << "Invalid choice.\n";

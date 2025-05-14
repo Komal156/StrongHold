@@ -3,7 +3,6 @@
 #include <stdexcept>
 #include <fstream>
 using namespace std;
-
 // Forward declarations
 class SocialClass;
 class Population;
@@ -45,9 +44,8 @@ private:
     Economy* economy;
     int mapX, mapY;
     int kingdomId;
-
 public:
-    Kingdom(const string& kingdomName, int id, const string& leaderName = "Default King",const string &heirname="default heir");//to add leader and heir name name
+    Kingdom(const string& kingdomName, int id, const string& leaderName = "Default King", const string& heirname = "default heir");
     virtual ~Kingdom();
 
     void simulateTurn();
@@ -55,7 +53,7 @@ public:
     void adjustStability(int modifier);
     void displayStatus() const;
     void saveGameState(const string& filename) const;
-    void loadGameState(const string& filename);
+    bool loadGameState(const string& filename); // Changed to return bool for better error handling
     void triggerRandomEvent();
     void resolveActiveEvents();
     void displayActiveEvents();
@@ -84,11 +82,9 @@ private:
     string recipient;
     string content;
     int year;
-
 public:
     Message(const string& sndr, const string& rcpt, const string& cntnt, int yr);
     void display() const;
-
     string getSender() const { return sender; }
     string getRecipient() const { return recipient; }
     string getContent() const { return content; }
@@ -104,12 +100,12 @@ private:
     bool active;
     int startYear;
     int duration;
-
 public:
     Alliance(const string& k1, const string& k2, const string& typ, int yr, int dur);
-    void breakAlliance();
+    Alliance(); // Default constructor
+    void breakAlliance(); // Basic version
     bool isActive() const { return active; }
-
+    bool isExpired(int currentYear) const;
     string getKingdom1() const { return kingdom1; }
     string getKingdom2() const { return kingdom2; }
     string getType() const { return type; }
@@ -127,12 +123,10 @@ private:
     string requestedResource;
     int quantityRequested;
     bool accepted;
-
 public:
     TradeOffer(const string& prop, const string& tgt, const string& res, int qtyO, const string& reqRes, int qtyR);
     bool accept(Kingdom& proposerKingdom, Kingdom& targetKingdom);
     bool isValid() const { return quantityOffered > 0 && quantityRequested > 0; }
-
     string getProposer() const { return proposer; }
     string getTarget() const { return target; }
     string getResourceType() const { return resourceType; }
@@ -146,7 +140,6 @@ public:
 class SmuggleOffer : public TradeOffer {
 private:
     int riskLevel;
-
 public:
     SmuggleOffer(const string& prop, const string& tgt, const string& res, int qtyO, const string& reqRes, int qtyR, int risk);
     bool accept(Kingdom& proposerKingdom, Kingdom& targetKingdom);
@@ -160,7 +153,6 @@ private:
     SmuggleOffer* smuggles[MAX_TRADES];
     int tradeCount;
     int smuggleCount;
-
 public:
     Market();
     ~Market();
@@ -177,16 +169,15 @@ private:
     int grid[MAP_SIZE][MAP_SIZE];
     string kingdomNames[MAX_KINGDOMS];
     int kingdomCount;
-
 public:
     Map();
     void assignKingdom(const string& name, int x, int y, int id);
-    void moveKingdom(int kingdomId, int newX, int newY);
     void display() const;
-    int getDistance(const string& k1, const string& k2) const;
-    bool isControlled(int x, int y, int kingdomId) const;
+    void clear();
+    bool isOccupied(int x, int y) const;
 };
-// World class (updated)
+
+// World class
 class World {
 private:
     Kingdom* kingdoms[MAX_KINGDOMS];
@@ -198,11 +189,11 @@ private:
     Market* market;
     Map* map;
     int currentYear;
-
 public:
     World();
     ~World();
     void addKingdom(Kingdom* kingdom);
+    void addKingdom(Kingdom* kingdom, int x, int y, int id);
     void simulateTurn();
     void sendMessage(const string& sender, const string& recipient, const string& content);
     void displayMessages(const string& kingdomName) const;
@@ -211,7 +202,6 @@ public:
     void proposeTrade(const string& proposer, const string& target, const string& res, int qtyO, const string& reqRes, int qtyR);
     void proposeSmuggle(const string& proposer, const string& target, const string& res, int qtyO, const string& reqRes, int qtyR, int risk);
     void declareWar(const string& attacker, const string& defender);
-    void moveKingdom(const string& kingdom, int x, int y);
     Kingdom* findKingdom(const string& name);
     bool areAllied(const string& k1, const string& k2) const;
     bool hasEmbargo(const string& k1, const string& k2) const;
