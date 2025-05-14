@@ -64,7 +64,7 @@ void Map::display() const {
     for (int i = 0; i < MAP_SIZE; i++) {
         for (int j = 0; j < MAP_SIZE; j++) {
             if (grid[i][j] == 0) {
-                cout << ". ";
+                cout << "*";
             }
             else {
                 cout << grid[i][j] << " ";

@@ -18,8 +18,12 @@ bool Leader::holdElection() const
 
 // Monarch Implementation
 Monarch::Monarch(const string& nm, int pop, int corrupt, const string& style,
-    const string& hr, int years)
-    : Leader(nm, pop, corrupt, style), heir(hr), reignYears(years) {
+    const string& heirname, int years)
+    : Leader(nm, pop, corrupt, style), heir(heirname), reignYears(years) 
+{
+}
+string Monarch::getHeir() const {
+    return heir; // Returns the heir's name stored in the heir member variable
 }
 
 void Monarch::makeDecision(int option) {

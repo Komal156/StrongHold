@@ -35,18 +35,24 @@ int main() {
         int choice = getValidatedInput(1, 4);
 
         try {
-            switch (choice) {
-            case 1: { // New Game
+            switch (choice) 
+            {
+            case 1:
+            { // New Game
                 int numKingdoms;
                 cout << "Enter number of kingdoms (2-4): ";
                 numKingdoms = getValidatedInput(2, 4);
                 for (int i = 0; i < numKingdoms; i++) {
-                    string kingdomName;
+                    string kingdomName, leaderName, heirName;
                     cout << "Enter name for kingdom " << i + 1 << ": ";
                     getline(cin, kingdomName);
-                    Kingdom* kingdom = new Kingdom(kingdomName, i + 1);
+                    cout << "Enter name for the leader of kingdom " << kingdomName << ": ";
+                    getline(cin, leaderName);
+                    cout << "Enter name for the heir of " << leaderName << ": ";
+                    getline(cin, heirName);
+                    Kingdom* kingdom = new Kingdom(kingdomName, i + 1, leaderName, heirName);
                     world->addKingdom(kingdom);
-                    logGameEvent("Kingdom " + kingdomName + " was founded", *kingdom);
+                    logGameEvent("Kingdom " + kingdomName + " was founded with leader " + leaderName + " and heir " + heirName, *kingdom);
                 }
                 playGame(*world);
                 break;
@@ -61,15 +67,23 @@ int main() {
                     cout << "Enter number of kingdoms to load: ";
                     numKingdoms = getValidatedInput(1, 4);
                     for (int i = 0; i < numKingdoms; i++) {
+                        cout << "Loading kingdom " << i + 1 << "\n";
                         string kingdomName;
                         cout << "Enter name for kingdom " << i + 1 << ": ";
                         getline(cin, kingdomName);
                         Kingdom* kingdom = new Kingdom(kingdomName, i + 1);
-                        kingdom->loadGameState(filename);
-                        newWorld->addKingdom(kingdom);
-                        logGameEvent("Kingdom " + kingdomName + " loaded from " + filename, *kingdom);
+                        try {
+                            kingdom->loadGameState(filename);
+                            newWorld->addKingdom(kingdom);
+                            logGameEvent("Kingdom " + kingdomName + " loaded from " + filename, *kingdom);
+                        }
+                        catch (const exception& e) {
+                            cerr << "Error loading kingdom " << kingdomName << ": " << e.what() << "\n";
+                            delete kingdom; // Clean up
+                            continue; // Skip to next kingdom
+                        }
                     }
-                    delete world; // Delete old world only after successful loading
+                    delete world;
                     world = newWorld;
                     playGame(*world);
                 }
@@ -85,7 +99,7 @@ int main() {
             case 4:
                 displayMainMenu();
                 // Return to Game
-            case 5: // Exit #exit
+            case 5: // Exit 
                 gameRunning = false;
                 break;
             default:
@@ -748,7 +762,7 @@ void logGameEvent(const string& event, const Kingdom& kingdom) {
         logFile.close();
     }
     else {
-        cerr << "Failed to open log file.\n";
+        cout << "Failed to open log file.\n";
     }
 }
 
@@ -763,6 +777,6 @@ void displayLogs() {
         logFile.close();
     }
     else {
-        cerr << "No logs available.\n";
+        cout << "No logs available.\n";
     }
 }

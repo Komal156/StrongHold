@@ -47,7 +47,7 @@ private:
     int kingdomId;
 
 public:
-    Kingdom(const string& kingdomName, int id);
+    Kingdom(const string& kingdomName, int id, const string& leaderName = "Default King",const string &heirname="default heir");//to add leader and heir name name
     virtual ~Kingdom();
 
     void simulateTurn();
@@ -215,7 +215,7 @@ public:
     Kingdom* findKingdom(const string& name);
     bool areAllied(const string& k1, const string& k2) const;
     bool hasEmbargo(const string& k1, const string& k2) const;
-    Kingdom** getKingdoms() const; // Remove inline implementation
+    Kingdom** getKingdoms() const;
     int getKingdomCount() const { return kingdomCount; }
     Market* getMarket() const { return market; }
     Map* getMap() const { return map; }
@@ -370,13 +370,14 @@ public:
 // Derived Leader Classes
 class Monarch : public Leader {
 private:
-    string heir;
+    string heir;  // Changed from heirname to heir
     int reignYears;
 
 public:
-    Monarch(const string& nm, int pop, int corrupt, const string& style, const string& hr, int years);
+    Monarch(const string& nm, int pop, int corrupt, const string& style, const string& heirname = "default heir", int years = 0);
     void makeDecision(int option) override;
     bool holdElection() const override;
+    string getHeir() const;  // Added getHeir method
 };
 
 class ElectedLeader : public Leader {

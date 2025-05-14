@@ -1,1 +1,10 @@
-//added
+karachi
+67
+12
+1825
+Peasant 500 51 20
+Merchant 300 61 30
+Noble 200 61 50
+150 100 50 70
+Ali 50 10 Benevolent
+7210000 10 100 1000 0

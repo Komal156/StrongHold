@@ -22,15 +22,22 @@ void Economy::calculateInflation() {
     inflation = treasury / 1000;
     if (inflation > 100) inflation = 100;
 }
-
-void Economy::adjustTaxRate(int newRate)
+void Economy::calculateGDP(Population* population, SocialClass** socialClasses, int classCount)
 {
-    if (newRate < 0 || newRate > 100)
+    // Simple GDP calculation based on population and social class contributions
+    gdp = population->getTotalCount() * 10; // Base GDP from population
+    for (int i = 0; i < classCount; ++i) 
     {
-        cout << "Invalid tax rate. Please enter a value between 0 and 100.\n";
-        return;
+        gdp += socialClasses[i]->calculateTaxContribution() * 5; // Contribution from each social class
     }
-    taxRate = newRate;
+}
+
+void Economy::adjustTaxRate(int rate)
+{
+    if (rate < 0 || rate > 100) {
+        throw runtime_error("Invalid tax rate: " + to_string(rate) + ". Must be between 0 and 100.");
+    }
+    taxRate = rate;
 }
 
 void Economy::fundService(int amount)
@@ -46,7 +53,15 @@ void Economy::fundService(int amount)
 void Economy::processLoans() {
     bank->collectDebt();
 }
-
+void Economy::updateInflation() {
+    // Simple inflation update based on economic factors
+    int baseInflation = 2; // Base inflation rate
+    int taxImpact = taxRate / 10; // Higher tax rates increase inflation
+    int corruptionImpact = corruptionLevel / 20; // Corruption adds to inflation
+    inflation = baseInflation + taxImpact + corruptionImpact;
+    if (inflation < 0) inflation = 0; // Ensure non-negative inflation
+    if (inflation > 20) inflation = 20; // Cap inflation at 20%
+}
 void Economy::addToTreasury(int amount) {
     if (amount < 0) {
         cout << "Invalid amount. Please enter a positive number.\n";
@@ -54,7 +69,8 @@ void Economy::addToTreasury(int amount) {
     }
     treasury += amount;
 }
-Economy::~Economy() {
+Economy::~Economy()
+{
     delete bank; // To avoid memory leak
 }
 ///a

@@ -3,4 +3,27 @@ Year 1: Kingdom comsats was founded
 Year 2: Message sent to komal
 Year 2: Message sent to fast
 Year 3: Alliance formed with gcu
-//added
+//addedYear 1: Kingdom faisalabad was founded
+Year 1: Kingdom gilgit was founded
+Year 1: Kingdom fast was founded
+Year 1: Kingdom gcu was founded
+Year 2: War declared on fast
+Year 1: Kingdom fast was founded
+Year 1: Kingdom comsats was founded
+Year 1: Kingdom karachi was founded with leader Ali and heir jawad
+Year 1: Kingdom Multan was founded with leader faizan and heir talal
+Year 1: Kingdom lahore was founded with leader saim and heir zara
+Year 6: War declared on karachi
+Year 7: Recruited 10 soldiers
+Year 10: Recruited 50 soldiers
+Year 11: War declared on 3
+Year 12: Game saved to savegame.txt
+Year 12: Kingdom karachi loaded from savegame.txt
+Year 12: Kingdom karachi loaded from savegame.txt
+Year 1: Kingdom thailand was founded with leader kugfuu and heir fugfuu
+Year 1: Kingdom finland was founded with leader gingu and heir chenchu
+Year 2: Collected taxes from all social classes
+Year 3: Addressed demands of social classes
+Year 5: Collected taxes from all social classes
+Year 6: Funded public service with 500 gold
+Year 7: War declared on finland

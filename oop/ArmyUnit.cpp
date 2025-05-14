@@ -1,10 +1,11 @@
 #include "stronghold.h"
 #include <iostream>
 using namespace std;
-
+//constructor
 ArmyUnit::ArmyUnit(int soldiers, int mrle, int training, int equipment) : soldierCount(soldiers), morale(mrle), trainingLevel(training), equipmentQuality(equipment) {}
 
-void ArmyUnit::recruit(int amount) {
+void ArmyUnit::recruit(int amount)
+{
     if (amount < 0) {
         cout << "Invalid recruitment amount. Please enter a positive number.\n";
         return;
@@ -58,10 +59,10 @@ void Infantry::train(int intensity) {
 
 // Cavalry Implementation
 Cavalry::Cavalry(int soldiers, int mrle, int training, int equipment, int hrs)
-    : ArmyUnit(soldiers, mrle, training, equipment), horses(hrs) {
-}
+    : ArmyUnit(soldiers, mrle, training, equipment), horses(hrs){ }
 
-int Cavalry::calculateStrength() const {
+int Cavalry::calculateStrength() const 
+{
     return ArmyUnit::calculateStrength() + horses * 2; // Horses add more strength
 }
 
