@@ -27,3 +27,4 @@ void Alliance::breakAlliance()
 bool Alliance::isExpired(int currentYear) const {
     return currentYear > startYear + duration;
 }
+//updated the alliance
