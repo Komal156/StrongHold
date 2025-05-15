@@ -4,7 +4,7 @@ using namespace std;
 
 World::World() : kingdomCount(0), messageCount(0), allianceCount(0), currentYear(1) {
     for (int i = 0; i < MAX_KINGDOMS; i++) {
-        kingdoms[i] = nullptr;
+        kingdoms[i] = nullptr;  //to pervent dangling pointer
     }
     for (int i = 0; i < MAX_MESSAGES; i++) {
         messages[i] = nullptr;
@@ -35,18 +35,22 @@ World::~World() {
     map = nullptr;
 }
 
-void World::addKingdom(Kingdom* kingdom) {
-    if (kingdomCount >= MAX_KINGDOMS) {
+void World::addKingdom(Kingdom* kingdom)
+{
+    if (kingdomCount >= MAX_KINGDOMS) 
+    {
         throw runtime_error("Maximum kingdom limit reached.");
     }
-    kingdoms[kingdomCount] = kingdom;
-    int x = kingdomCount % MAP_SIZE;
-    int y = kingdomCount % MAP_SIZE;
+    kingdoms[kingdomCount] = kingdom;  //Assigns the kingdom pointer to the next available slot in the kingdoms array.
+    int x = kingdomCount % MAP_SIZE;   //row   Attempts to place the kingdom in a row based on the count.
+    int y = kingdomCount % MAP_SIZE;    //col
     bool found = false;
-    for (int i = 0; i < MAP_SIZE * MAP_SIZE; i++) {
+    for (int i = 0; i < MAP_SIZE * MAP_SIZE; i++)    //Searches all possible positions on the grid.
+    {
         x = (kingdomCount + i) % MAP_SIZE;
         y = (kingdomCount + i) % MAP_SIZE;
-        if (!map->isOccupied(x, y)) {
+        if (!map->isOccupied(x, y))
+        {
             found = true;
             break;
         }
@@ -54,8 +58,8 @@ void World::addKingdom(Kingdom* kingdom) {
     if (!found) {
         throw runtime_error("No available map positions for new kingdom.");
     }
-    map->assignKingdom(kingdom->getName(), x, y, kingdomCount + 1);
-    kingdom->setMapPosition(x, y);
+    map->assignKingdom(kingdom->getName(), x, y, kingdomCount + 1);   //update map
+    kingdom->setMapPosition(x, y); 
     kingdomCount++;
 }
 

@@ -154,7 +154,7 @@ int getValidatedInput(int min, int max) {
     while (true) {
         if (!(cin >> input)) {
             cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');    //skip all characters to buffer until /n
             cout << "Invalid input. Please enter a number: ";
         }
         else if (input < min || input > max) {
